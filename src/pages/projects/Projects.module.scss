@@ -1,0 +1,62 @@
+.wrapper {
+margin: 2%
+}
+
+.inputRow {
+  display: flex;
+  justify-content: center;
+}
+
+.projects {
+  margin-top: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.project {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  background-color: darkgrey;
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.removeButton {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: pointer;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  border: none;
+  color: white;
+  background: #ff3e4e;
+  transition: all 0.25s ease;
+}
+
+h1 {
+  text-align: center;
+}
+
+h3 {
+  margin-top: 0;
+  text-align: center;
+}
+
+.primaryBtn {
+  margin-left: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  border: none;
+  color: white;
+  background: #185adb;
+}
