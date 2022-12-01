@@ -10,6 +10,11 @@
   background: #185adb;
 }
 
+.primaryBtn:hover{
+  background: #3467c8;
+}
+
+
 ::-webkit-file-upload-button {
   margin: 16px 8px 0 0;
   cursor: pointer;
@@ -34,6 +39,7 @@
 
 .centered {
   position: fixed;
+  z-index: 10000;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -121,6 +127,36 @@
 .radioButtons {
   display: flex;
   align-items: center;
+}
+
+.upload {
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.upload >button {
+  width: 50%;
+  margin: 8px 8px 0 0;
+  cursor: pointer;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  border: none;
+  color: white;
+  background: #185adb;
+}
+
+.upload >button:hover{
+  background: #3467c8;
+}
+
+.upload >a {
+  width: 50%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .radioButtons input {

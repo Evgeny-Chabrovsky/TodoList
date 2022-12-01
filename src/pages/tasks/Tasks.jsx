@@ -25,12 +25,13 @@ const STATUSES_BY_COLUMN = {
 const Tasks = () => {
   const location = useLocation();
   const projectId = location.pathname.replace(/^\D+/g, "");
-
   const dataStorage = JSON.parse(localStorage.getItem("projects"));
   const targetIndex = dataStorage.findIndex((item) => item.id === projectId);
 
+  const [taskInputValue, setTaskInputValue] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [timeArray, setTimeArray] = useState(null);
+  const [editingItem, setEditingItem] = useState(null);
   const [state, setState] = useState(
     dataStorage[targetIndex].tasks || {
       queue: {
@@ -62,7 +63,7 @@ const Tasks = () => {
                   state.done.items.length +
                   1
               ),
-              name: data.title || "New task",
+              title: data.title || "New task",
               description: data.description,
               status: "pending",
               priority: data.priority,
@@ -72,6 +73,39 @@ const Tasks = () => {
             },
             ...prev.queue.items,
           ],
+        },
+      };
+    });
+  };
+
+  const handleEditButtonClick = (event) => {
+    const column = event.currentTarget.dataset.key;
+    const id = event.currentTarget.id;
+    setIsModalOpen(true);
+    setEditingItem({ column, id });
+    setTaskInputValue(state[column].items.find((item) => item.id === id));
+  };
+
+  const handleEditTask = (data) => {
+    setState((prev) => {
+      return {
+        ...prev,
+        [editingItem.column]: {
+          ...prev[editingItem.column],
+          items: prev[editingItem.column].items.map((item) => {
+            if (item.id === editingItem.id) {
+              return {
+                ...item,
+                title: data.title,
+                description: data.description,
+                priority: data.priority,
+                file: data.file,
+                edited: dayjs().format("MMM D, YYYY HH:mm"),
+              };
+            }
+
+            return item;
+          }),
         },
       };
     });
@@ -139,121 +173,138 @@ const Tasks = () => {
   }, [state]);
 
   return (
-    <div className={styles.wrapper}>
-      <div>
-        <button
-          className={styles.primaryBtn}
-          onClick={() => setIsModalOpen(true)}
-        >
-          Add new task
-        </button>
-      </div>
-      <div className={styles.tasksContainer}>
-        {isModalOpen && (
-          <Modal setIsOpen={setIsModalOpen} handleAddTask={addItem} />
-        )}
-        <DragDropContext onDragEnd={handleDragEnd}>
-          {Object.keys(state).map((key) => {
-            return (
-              <div className={styles.column} key={key}>
-                <h3>{state[key].title}</h3>
-                <Droppable droppableId={key}>
-                  {(provided) => {
-                    return (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        className={styles.droppableColumn}
-                      >
-                        {state[key].items.map((el, index) => {
-                          const time = timeArray?.find((task) => {
-                            return task.id === el.id;
-                          })?.time;
+    <>
+      {isModalOpen && (
+        <Modal
+          setIsOpen={setIsModalOpen}
+          handleAddTask={addItem}
+          handleEditTask={handleEditTask}
+          taskInputValue={taskInputValue}
+        />
+      )}
+      <div className={styles.wrapper}>
+        <div>
+          <button
+            className={styles.primaryBtn}
+            onClick={() => {
+              setTaskInputValue(null);
+              setIsModalOpen(true);
+            }}
+          >
+            Add new task
+          </button>
+        </div>
+        <div className={styles.tasksContainer}>
+          <DragDropContext onDragEnd={handleDragEnd}>
+            {Object.keys(state).map((key) => {
+              return (
+                <div className={styles.column} key={key}>
+                  <h3>{state[key].title}</h3>
+                  <Droppable droppableId={key}>
+                    {(provided) => {
+                      return (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.droppableProps}
+                          className={styles.droppableColumn}
+                        >
+                          {state[key].items.map((el, index) => {
+                            const time = timeArray?.find((task) => {
+                              return task.id === el.id;
+                            })?.time;
 
-                          return (
-                            <Draggable
-                              key={el.id}
-                              index={index}
-                              draggableId={el.id}
-                            >
-                              {(provided) => {
-                                return (
-                                  <div
-                                    className={styles.task}
-                                    ref={provided.innerRef}
-                                    {...provided.draggableProps}
-                                    {...provided.dragHandleProps}
-                                  >
-                                    <div className={styles.title}>
-                                      {el.name}
-                                    </div>
-                                    <div className={styles.description}>
-                                      {el.description}
-                                    </div>
+                            return (
+                              <Draggable
+                                key={el.id}
+                                index={index}
+                                draggableId={el.id}
+                              >
+                                {(provided) => {
+                                  return (
                                     <div
-                                      className={styles.properties}
-                                    >{`Number: ${el.id}`}</div>
-                                    <div
-                                      className={styles.properties}
-                                    >{`Status: ${el.status}`}</div>
-                                    <div
-                                      className={styles.properties}
-                                    >{`Created: ${el.createdOn}`}</div>
-                                    <div
-                                      className={styles.properties}
-                                    >{`Priority: ${el.priority}`}</div>
-
-                                    {time && key === "development" && (
+                                      className={styles.task}
+                                      ref={provided.innerRef}
+                                      {...provided.draggableProps}
+                                      {...provided.dragHandleProps}
+                                    >
+                                      <div className={styles.title}>
+                                        {el.title}
+                                      </div>
+                                      <div className={styles.description}>
+                                        {el.description}
+                                      </div>
                                       <div
                                         className={styles.properties}
-                                      >{`Time in progress: ${time}`}</div>
-                                    )}
-                                    {key === "done" && (
-                                      <>
+                                      >{`Number: ${el.id}`}</div>
+                                      <div
+                                        className={styles.properties}
+                                      >{`Status: ${el.status}`}</div>
+                                      <div
+                                        className={styles.properties}
+                                      >{`Created: ${el.createdOn}`}</div>
+                                      <div
+                                        className={styles.properties}
+                                      >{`Priority: ${el.priority}`}</div>
+                                      {time && key === "development" && (
                                         <div
                                           className={styles.properties}
-                                        >{`Completed: ${el.completedAt}`}</div>
-                                        <div
-                                          className={styles.properties}
-                                        >{`Time in progress: ${
-                                          el.startedAt
-                                            ? `${dayjs(el.completedAt).from(
-                                                dayjs(el.startedAt),
-                                                true
-                                              )}`
-                                            : " 🚀"
-                                        } `}</div>
-                                      </>
-                                    )}
-                                    {el.file && (
-                                      <a
-                                        href={el.file.url}
-                                        download={`${el.file.name}`}
+                                        >{`Time in progress: ${time}`}</div>
+                                      )}
+                                      {key === "done" && (
+                                        <>
+                                          <div
+                                            className={styles.properties}
+                                          >{`Completed: ${el.completedAt}`}</div>
+                                          <div
+                                            className={styles.properties}
+                                          >{`Time in progress: ${
+                                            el.startedAt
+                                              ? `${dayjs(el.completedAt).from(
+                                                  dayjs(el.startedAt),
+                                                  true
+                                                )}`
+                                              : " 🚀"
+                                          } `}</div>
+                                        </>
+                                      )}
+                                      {el.file && (
+                                        <a
+                                          href={el.file.url}
+                                          download={`${el.file.name}`}
+                                        >
+                                          <img
+                                            className={styles.image}
+                                            src={el.file.url}
+                                            alt="preview"
+                                          />
+                                        </a>
+                                      )}
+                                      <button
+                                        id={el.id}
+                                        data-key={key}
+                                        onClick={handleEditButtonClick}
+                                        className={styles.editButton}
                                       >
-                                        <img
-                                          className={styles.image}
-                                          src={el.file.url}
-                                          alt="preview"
-                                        />
-                                      </a>
-                                    )}
-                                  </div>
-                                );
-                              }}
-                            </Draggable>
-                          );
-                        })}
-                        {provided.placeholder}
-                      </div>
-                    );
-                  }}
-                </Droppable>
-              </div>
-            );
-          })}
-        </DragDropContext>
+                                        Edit
+                                      </button>
+                                    </div>
+                                  );
+                                }}
+                              </Draggable>
+                            );
+                          })}
+                          {provided.placeholder}
+                        </div>
+                      );
+                    }}
+                  </Droppable>
+                </div>
+              );
+            })}
+          </DragDropContext>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

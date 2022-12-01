@@ -33,7 +33,7 @@
 .droppableColumn {
   min-height: calc(100vh - 215px);
   padding: 24px;
-  background-color: darkgrey;
+  background-color: #e6e6ea;
   border-radius: 8px;
   display: flex;
   gap: 24px;
@@ -43,9 +43,10 @@
 
 .task {
   width: calc(100% - 16px);
+  position: relative;
   padding: 8px;
   border-radius: 8px;
-  background-color: cadetblue;
+  background-color: #b3cde0;
 }
 
 .title {
@@ -67,4 +68,19 @@
   margin-top: 16px;
   border-radius: 4px;
   cursor: pointer;
+}
+
+.editButton {
+  margin: 8px 8px;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  cursor: pointer;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  border: none;
+  color: white;
+  background: #185adb;
 }

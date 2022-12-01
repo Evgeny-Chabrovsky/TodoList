@@ -1,13 +1,28 @@
-import React, { useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import PropTypes from "prop-types";
 
 import styles from "./Modal.module.scss";
 
-const Modal = ({ setIsOpen, handleAddTask }) => {
+const Modal = ({
+  setIsOpen,
+  handleAddTask,
+  taskInputValue,
+  handleEditTask,
+}) => {
+  const fileInput = useRef(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("low");
-  const [file, setFile] = useState();
+  const [file, setFile] = useState("");
+
+  useEffect(() => {
+    if (taskInputValue) {
+      setTitle(taskInputValue.title);
+      setDescription(taskInputValue.description);
+      setPriority(taskInputValue.priority);
+      setFile(taskInputValue.file);
+    }
+  }, [taskInputValue]);
 
   const handlePriorityChange = (event) => {
     setPriority(event.target.value);
@@ -22,6 +37,10 @@ const Modal = ({ setIsOpen, handleAddTask }) => {
     });
   };
 
+  const handleClick = () => {
+    fileInput.current.click();
+  };
+
   const handleChange = (event) => {
     const file = event.target.files[0];
 
@@ -32,7 +51,9 @@ const Modal = ({ setIsOpen, handleAddTask }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    handleAddTask({ title, description, priority, file });
+    taskInputValue
+      ? handleEditTask({ title, description, priority, file })
+      : handleAddTask({ title, description, priority, file });
     setIsOpen(false);
     event.target.reset();
   };
@@ -43,7 +64,9 @@ const Modal = ({ setIsOpen, handleAddTask }) => {
       <div className={styles.centered}>
         <div className={styles.modal}>
           <div className={styles.modalHeader}>
-            <h5 className={styles.heading}>Add new task</h5>
+            <h5 className={styles.heading}>
+              {taskInputValue ? "Edit task" : "Add new task"}
+            </h5>
           </div>
           <button className={styles.closeBtn} onClick={() => setIsOpen(false)}>
             Close
@@ -68,6 +91,7 @@ const Modal = ({ setIsOpen, handleAddTask }) => {
                 className={styles.input}
                 type="text"
                 id="description"
+                value={description}
                 name="description"
                 onChange={(event) => setDescription(event.target.value)}
               />
@@ -101,8 +125,25 @@ const Modal = ({ setIsOpen, handleAddTask }) => {
                 />
                 <label htmlFor="high">High</label>
               </div>
-              <input type="file" onChange={handleChange} />
-              <input className={styles.primaryBtn} type="submit" value="Add" />
+              <div className={styles.upload}>
+                <input
+                  onChange={handleChange}
+                  ref={fileInput}
+                  type="file"
+                  style={{ display: "none" }}
+                />
+                <button onClick={handleClick} type={"button"}>
+                  Upload a file
+                </button>
+                <a href={file.url} download={file.name}>
+                  {file.name}
+                </a>
+              </div>
+              <input
+                className={styles.primaryBtn}
+                type="submit"
+                value={taskInputValue ? "Edit task" : "Add new task"}
+              />
             </form>
           </div>
         </div>
@@ -114,6 +155,12 @@ const Modal = ({ setIsOpen, handleAddTask }) => {
 Modal.propTypes = {
   setIsOpen: PropTypes.func.isRequired,
   handleAddTask: PropTypes.func.isRequired,
+  handleEditTask: PropTypes.func,
+  taskInputValue: PropTypes.object,
+};
+Modal.defaultProps = {
+  handleEditTask: null,
+  taskInputValue: null,
 };
 
 export default Modal;
